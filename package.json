@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsc --watch",
-    "build": "rollup --config rollup.config.js"
+    "build": "rollup --config rollup.config.js",
+    "publish": "node --experimental-json-modules scripts/publish.js"
   },
   "repository": {
     "type": "git",
