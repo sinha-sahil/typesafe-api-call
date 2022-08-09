@@ -1,6 +1,6 @@
 {
   "name": "typesafe-api-call",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A TS/JS API caller util for making typesafe API calls",
   "main": "index.ts",
   "type": "module",
