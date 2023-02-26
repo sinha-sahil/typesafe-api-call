@@ -120,7 +120,7 @@ export function isJSON(value: unknown): boolean {
 export async function generateRawResponse(apiResponse: Response): Promise<unknown> {
   let result = null;
   const contentType = apiResponse.headers.get('content-type');
-  if (contentType === 'application/json') {
+  if (contentType?.includes('application/json')) {
     result = await apiResponse.json();
   } else {
     result = await apiResponse.text();

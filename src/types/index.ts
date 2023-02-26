@@ -31,10 +31,7 @@ export type ResponseDecoder<ExpectedResponse> = (rawResponse: unknown) => Expect
 /**
  * @description Type of native fetch function
  */
-export type FetchType = (
-  input: RequestInfo,
-  init?: RequestInit | undefined
-) => Promise<Response>;
+export type FetchType = (input: RequestInfo, init?: RequestInit | undefined) => Promise<Response>;
 
 /**
  * @description types for hooks function which will be triggered on start & end of api calls
