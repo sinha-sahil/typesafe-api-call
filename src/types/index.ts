@@ -32,7 +32,7 @@ export type ResponseDecoder<ExpectedResponse> = (rawResponse: unknown) => Expect
  * @description Type of native fetch function
  */
 export type FetchType = (
-  input: RequestInfo | URL,
+  input: RequestInfo,
   init?: RequestInit | undefined
 ) => Promise<Response>;
 
