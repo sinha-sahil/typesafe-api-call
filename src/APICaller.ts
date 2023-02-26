@@ -35,7 +35,7 @@ export class APICaller {
         hook(apiRequest);
       });
       const startTime = Date.now();
-      const apiResponse: Response = await apiCaller(apiRequest.url, apiRequest);
+      const apiResponse: Response = await apiCaller(apiRequest.url.href, apiRequest);
       const timeConsumed = Date.now() - startTime;
       const rawResponse: unknown = await generateRawResponse(apiResponse);
       const decodeResponse = responseDecoder(rawResponse);
