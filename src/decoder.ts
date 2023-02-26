@@ -6,7 +6,7 @@
 // Added to avoid fallback as null which might cause adding adding additional null checks before using
 export const errorDelimiter = '<!!error!!>';
 
-export function decodeString(value: any): string | null {
+export function decodeString(value: unknown): string | null {
   if (typeof value === 'string') {
     return value;
   }
@@ -15,10 +15,10 @@ export function decodeString(value: any): string | null {
 
 /**
  * @description A function which attempts to safely cast any value to a valid string
- * @param value Any value
+ * @param value Value with unknown type
  * @returns Attempts to convert the passed value to a valid string, returns errorDelimiter in case cast fails
  */
-export function _decodeString(value: any): string {
+export function _decodeString(value: unknown): string {
   if (typeof value === 'string') {
     return value;
   }
@@ -27,10 +27,10 @@ export function _decodeString(value: any): string {
 
 /**
  * @description A function which attempts to safely cast any value to a valid number
- * @param value Any value
+ * @param value Value with unknown type
  * @returns Attempts to convert the passed value to a valid number, returns null in case cast fails
  */
-export function decodeNumber(value: any): number | null {
+export function decodeNumber(value: unknown): number | null {
   if (typeof value === 'number') {
     return value;
   }
@@ -39,10 +39,10 @@ export function decodeNumber(value: any): number | null {
 
 /**
  * @description A function which attempts to safely cast any value to a valid boolean
- * @param value Any value
+ * @param value Value with unknown type
  * @returns Attempts to convert the passed value to a valid boolean, returns null in case cast fails
  */
-export function decodeBoolean(value: any): boolean | null {
+export function decodeBoolean(value: unknown): boolean | null {
   if (typeof value === 'boolean') {
     return value;
   }
@@ -51,17 +51,17 @@ export function decodeBoolean(value: any): boolean | null {
 
 /**
  * @description A function which attempts to decode any value to a generic arrays
- * @param value Any value
+ * @param value Value with unknown type
  * @param decoder A function which decodes the any data to the generic type passed, if decode fails returns null, This will be used to decode all elements of the any array passed
  * @returns Array of decoded elements if passed value was an array and elements were of generic type, returns null in case value passed was not array at all
  */
 export function decodeArray<ArrayElementType>(
-  value: any,
-  decoder: (rawInput: any) => ArrayElementType | null
+  value: unknown,
+  decoder: (rawInput: unknown) => ArrayElementType | null
 ): Array<ArrayElementType> | null {
   if (Array.isArray(value)) {
     const result: Array<ArrayElementType> = [];
-    value.forEach((currentElement: any) => {
+    value.forEach((currentElement: unknown) => {
       const decodedCurrentElement = decoder(currentElement);
       if (decodedCurrentElement) {
         result.push(decodedCurrentElement);
@@ -79,7 +79,7 @@ export function castArray<FromType, ToType>(
   return fromArray.map((element) => converter(element));
 }
 
-export function decodeDate(rawInput: any): Date | null {
+export function decodeDate(rawInput: unknown): Date | null {
   if (typeof rawInput === 'string' || typeof rawInput === 'object') {
     const constructedDate = new Date('' + rawInput);
     if (!isNaN(constructedDate.getTime())) {
@@ -96,7 +96,7 @@ export function decodeDate(rawInput: any): Date | null {
  */
 
 export function noErrorOrNullValues(
-  value: { [key: string]: any },
+  value: { [key: string]: unknown },
   nullableKeys: Array<string> = []
 ): boolean {
   let noErrorsPresent = true;
@@ -113,6 +113,17 @@ export function noErrorOrNullValues(
   return noErrorsPresent && noNullPresent;
 }
 
-export function isJSON(value: any): boolean {
+export function isJSON(value: unknown): boolean {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export async function generateRawResponse(apiResponse: Response): Promise<unknown> {
+  let result = null;
+  const contentType = apiResponse.headers.get('content-type');
+  if (contentType === 'application/json') {
+    result = await apiResponse.json();
+  } else {
+    result = await apiResponse.text();
+  }
+  return result;
 }

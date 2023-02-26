@@ -6,3 +6,4 @@
 /**/dist/
 package-lock.json
 /package/
+pnpm-lock.yaml
