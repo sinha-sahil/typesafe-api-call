@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { createInterface } from 'readline';
-import packageJson from '../package.json' assert { type: 'json' };;
+import packageJson from '../package.json' assert { type: 'json' };
 import fs from 'fs';
 
 const _fs = fs.promises;
@@ -54,7 +54,10 @@ switch (version) {
 logWarning(`version set to ${newVersion}`);
 
 packageJson.version = newVersion;
-await _fs.writeFile('package.json', Buffer.from(JSON.stringify(packageJson, null, 2), 'utf-8'));
+await _fs.writeFile(
+  'package.json',
+  Buffer.from(JSON.stringify(packageJson, null, 2) + '\n', 'utf-8')
+);
 
 await _exec(`
   git add package.json &&

@@ -11,7 +11,7 @@ import { APISuccess, APIFailure } from './types';
 
 export class APICaller {
   static startHooks: APICallStartHook[] = [];
-  static endHooks: Array<APICallEndHook<unknown>> = [];
+  static endHooks: Array<APICallEndHook<unknown, unknown>> = [];
 
   /**
    * @name APICaller.call
@@ -23,13 +23,13 @@ export class APICaller {
    * @returns An resolved Promise with Two Instances - APISuccess or APIFailure
    */
 
-  static async call<ExpectedResponse, ErrorResponse>(
+  static async call<SuccessResponse, ErrorResponse>(
     apiRequest: APIRequest,
-    responseDecoder: ResponseDecoder<ExpectedResponse>,
+    responseDecoder: ResponseDecoder<SuccessResponse>,
     errorResponseDecoder: ResponseDecoder<ErrorResponse | unknown> = (e) => e,
     apiCaller: FetchType = fetch
-  ): Promise<APIResponse<ExpectedResponse | ErrorResponse>> {
-    let result: APIResponse<ExpectedResponse | ErrorResponse>;
+  ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
+    let result: APIResponse<SuccessResponse, ErrorResponse>;
     try {
       this.startHooks.forEach((hook) => {
         hook(apiRequest);
@@ -71,7 +71,7 @@ export class APICaller {
     this.startHooks.push(hook);
   }
 
-  static registerEndHook(hook: APICallEndHook<unknown>): void {
+  static registerEndHook(hook: APICallEndHook<unknown, unknown>): void {
     this.endHooks.push(hook);
   }
 }
