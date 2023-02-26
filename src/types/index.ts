@@ -22,7 +22,9 @@ export interface APIRequest extends RequestInit {
  * @description Denotes all possible responses of an API call
  */
 
-export type APIResponse<ExpectedResponseType> = APISuccess<ExpectedResponseType> | APIFailure;
+export type APIResponse<SuccessResponseType, FailureResponseType> =
+  | APISuccess<SuccessResponseType>
+  | APIFailure<FailureResponseType>;
 
 export type ResponseDecoder<ExpectedResponse> = (rawResponse: unknown) => ExpectedResponse | null;
 
@@ -40,7 +42,7 @@ export type FetchType = (
 
 export type APICallStartHook = (apiRequest: APIRequest) => void;
 
-export type APICallEndHook<ResponseType> = (
+export type APICallEndHook<SuccessResponseType, FailureResponseType> = (
   apiRequest: APIRequest,
-  apiResponse: APIResponse<ResponseType>
+  apiResponse: APIResponse<SuccessResponseType, FailureResponseType>
 ) => void;

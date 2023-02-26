@@ -3,10 +3,10 @@
  * @description Construct an API Error Instance.
  * @constructor Takes ErrorMessage String and Error Code Number
  */
-export class APIFailure {
+export class APIFailure<FailureResponseType> {
   readonly errorMessage: string;
   readonly errorCode: number;
-  readonly errorResponse: unknown;
+  readonly errorResponse: FailureResponseType | unknown;
   readonly time: number;
 
   constructor(errorMessage: string, errorCode: number, errorResponse: unknown, time: number) {
