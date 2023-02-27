@@ -32,7 +32,7 @@ export class APICaller {
     let result: APIResponse<SuccessResponse, ErrorResponse>;
     try {
       this.startHooks.forEach((hook) => {
-        hook(apiRequest);
+        hook.func(apiRequest);
       });
       const startTime = Date.now();
       const apiResponse: Response = await apiCaller(apiRequest.url.href, apiRequest);
@@ -62,16 +62,20 @@ export class APICaller {
       result = callerError;
     }
     this.endHooks.forEach((hook) => {
-      hook(apiRequest, result);
+      hook.func(apiRequest, result);
     });
     return result;
   }
 
   static registerStartHook(hook: APICallStartHook): void {
-    this.startHooks.push(hook);
+    if (typeof this.startHooks.find((presentHook) => presentHook.id === hook.id) !== 'undefined') {
+      this.startHooks.push(hook);
+    }
   }
 
   static registerEndHook(hook: APICallEndHook<unknown, unknown>): void {
-    this.endHooks.push(hook);
+    if (typeof this.endHooks.find((presentHook) => presentHook.id === hook.id) !== 'undefined') {
+      this.endHooks.push(hook);
+    }
   }
 }
