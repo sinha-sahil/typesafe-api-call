@@ -2,6 +2,8 @@
  * @description A set utility function which helps the user decode values to primitive/ generic types
  */
 
+import { JSONObject } from './types';
+
 // Unique string delimiter to denote a key was not found.
 // Added to avoid fallback as null which might cause adding adding additional null checks before using
 export const errorDelimiter = '<!!error!!>';
@@ -113,7 +115,7 @@ export function noErrorOrNullValues(
   return noErrorsPresent && noNullPresent;
 }
 
-export function isJSON(value: unknown): boolean {
+export function isJSON(value: unknown): value is JSONObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 

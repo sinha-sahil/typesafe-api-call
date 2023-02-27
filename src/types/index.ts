@@ -35,11 +35,25 @@ export type FetchType = (input: RequestInfo, init?: RequestInit | undefined) => 
 
 /**
  * @description types for hooks function which will be triggered on start & end of api calls
+ * @description Takes two parameters id &
  */
 
-export type APICallStartHook = (apiRequest: APIRequest) => void;
+export type APICallStartHook = { id: string; func: (apiRequest: APIRequest) => void };
 
-export type APICallEndHook<SuccessResponseType, FailureResponseType> = (
-  apiRequest: APIRequest,
-  apiResponse: APIResponse<SuccessResponseType, FailureResponseType>
-) => void;
+export type APICallEndHook<SuccessResponseType, FailureResponseType> = {
+  id: string;
+  func: (
+    apiRequest: APIRequest,
+    apiResponse: APIResponse<SuccessResponseType, FailureResponseType>
+  ) => void;
+};
+
+/**
+ * @description Recursive type for all possible value a key in JSON can have
+ */
+
+export type JSONValue = string | number | boolean | null | JSONObject | JSONValue[];
+
+export type JSONObject = {
+  [key: string]: JSONValue;
+};
