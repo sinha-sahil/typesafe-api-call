@@ -6,13 +6,21 @@
 export class APIFailure<FailureResponseType> {
   readonly errorMessage: string;
   readonly errorCode: number;
-  readonly errorResponse: FailureResponseType | unknown;
+  readonly errorResponse: FailureResponseType | null;
+  readonly response: unknown;
   readonly time: number;
 
-  constructor(errorMessage: string, errorCode: number, errorResponse: unknown, time: number) {
+  constructor(
+    errorMessage: string,
+    errorCode: number,
+    errorResponse: FailureResponseType | null,
+    response: unknown,
+    time: number
+  ) {
     this.errorMessage = errorMessage;
     this.errorCode = errorCode;
     this.errorResponse = errorResponse;
+    this.response = response;
     this.time = time;
   }
 }

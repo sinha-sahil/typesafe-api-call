@@ -26,7 +26,7 @@ export class APICaller {
   static async call<SuccessResponse, ErrorResponse>(
     apiRequest: APIRequest,
     responseDecoder: ResponseDecoder<SuccessResponse>,
-    errorResponseDecoder: ResponseDecoder<ErrorResponse | unknown> = (e) => e,
+    errorResponseDecoder: ResponseDecoder<ErrorResponse> = () => null,
     apiCaller: FetchType = fetch
   ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
     let result: APIResponse<SuccessResponse, ErrorResponse>;
@@ -53,12 +53,19 @@ export class APICaller {
           'Failed to decode API result to success response',
           apiResponse.status,
           decodedErrorResponse,
+          rawResponse,
           timeConsumed
         );
         result = apiFailureResponse;
       }
     } catch (e: unknown) {
-      const callerError = new APIFailure('Exception in call API: ' + String(e), -1, null, 0);
+      const callerError = new APIFailure<ErrorResponse>(
+        'Exception in call API: ' + String(e),
+        -1,
+        null,
+        null,
+        0
+      );
       result = callerError;
     }
     this.endHooks.forEach((hook) => {
