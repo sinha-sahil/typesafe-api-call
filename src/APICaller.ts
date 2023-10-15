@@ -1,4 +1,4 @@
-import { generateRawResponse } from './decoder';
+import { generateRawResponse } from './utils';
 import type {
   APICallStartHook,
   APICallEndHook,

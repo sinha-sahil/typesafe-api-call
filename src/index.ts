@@ -1,3 +1,3 @@
 export * from './APICaller';
-export * from './decoder';
+export * from './utils';
 export * from './types';

@@ -47,13 +47,3 @@ export type APICallEndHook<SuccessResponseType, FailureResponseType> = {
     apiResponse: APIResponse<SuccessResponseType, FailureResponseType>
   ) => void;
 };
-
-/**
- * @description Recursive type for all possible value a key in JSON can have
- */
-
-export type JSONValue = string | number | boolean | null | JSONObject | JSONValue[];
-
-export type JSONObject = {
-  [key: string]: JSONValue;
-};
