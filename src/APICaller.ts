@@ -1,11 +1,12 @@
-import { generateRawResponse } from './utils';
+import { generateRawResponse, getErrorDetails } from './utils';
 import type {
   APICallStartHook,
   APICallEndHook,
   APIRequest,
   APIResponse,
   FetchType,
-  ResponseDecoder
+  ResponseDecoder,
+  ErrorDetails
 } from './types';
 import { APISuccess, APIFailure } from './types';
 
@@ -23,10 +24,10 @@ export class APICaller {
    * @returns An resolved Promise with Two Instances - APISuccess or APIFailure
    */
 
-  static async call<SuccessResponse, ErrorResponse>(
+  static async call<SuccessResponse, ErrorResponse = unknown>(
     apiRequest: APIRequest,
     responseDecoder: ResponseDecoder<SuccessResponse>,
-    errorResponseDecoder: ResponseDecoder<ErrorResponse | unknown> = (e) => e,
+    errorResponseDecoder: ResponseDecoder<ErrorResponse> = (_) => null,
     apiCaller: FetchType = fetch
   ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
     let result: APIResponse<SuccessResponse, ErrorResponse>;
@@ -48,17 +49,34 @@ export class APICaller {
         );
         result = apiSuccessResponse;
       } else {
-        const decodedErrorResponse = await errorResponseDecoder(rawResponse);
+        const decodedErrorResponse = errorResponseDecoder(rawResponse);
+        const errorDetails: ErrorDetails = {
+          class: 'DecodeFailure',
+          name: 'ErrorDecodeFailure',
+          cause: null,
+          message: '',
+          stack: null
+        };
         const apiFailureResponse = new APIFailure(
           'Failed to decode API result to success response',
           apiResponse.status,
           decodedErrorResponse,
-          timeConsumed
+          rawResponse,
+          timeConsumed,
+          errorDetails
         );
         result = apiFailureResponse;
       }
     } catch (e: unknown) {
-      const callerError = new APIFailure('Exception in call API: ' + String(e), -1, null, 0);
+      const errorDetails = getErrorDetails(e);
+      const callerError = new APIFailure(
+        'Exception in Call API',
+        -1,
+        null,
+        JSON.stringify(e),
+        0,
+        errorDetails
+      );
       result = callerError;
     }
     this.endHooks.forEach((hook) => {

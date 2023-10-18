@@ -4,6 +4,9 @@ import type { APISuccess } from './APISuccess';
 export * from './APISuccess';
 export * from './APIFailure';
 
+/**
+ * @name HttpMethod
+ */
 export type HttpMethod = 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 /**
@@ -24,11 +27,15 @@ export interface APIRequest extends RequestInit {
 
 export type APIResponse<SuccessResponseType, FailureResponseType> =
   | APISuccess<SuccessResponseType>
-  | APIFailure<FailureResponseType>;
+  | APIFailure<FailureResponseType | null>;
 
+/**
+ * @name ResponseDecoder
+ */
 export type ResponseDecoder<ExpectedResponse> = (rawResponse: unknown) => ExpectedResponse | null;
 
 /**
+ * @name FetchType
  * @description Type of native fetch function
  */
 export type FetchType = (input: RequestInfo, init?: RequestInit | undefined) => Promise<Response>;
@@ -38,12 +45,42 @@ export type FetchType = (input: RequestInfo, init?: RequestInit | undefined) => 
  * @description Takes two parameters id &
  */
 
+/**
+ * @name APICallStartHook
+ */
 export type APICallStartHook = { id: string; func: (apiRequest: APIRequest) => void };
 
+
+/**
+ * @name APICallEndHook
+ */
 export type APICallEndHook<SuccessResponseType, FailureResponseType> = {
   id: string;
   func: (
     apiRequest: APIRequest,
     apiResponse: APIResponse<SuccessResponseType, FailureResponseType>
   ) => void;
+};
+
+/**
+ * @name ErrorClass
+ * @description Classes of exceptions encountered during the fetch call or parsing network call response
+ */
+export type ErrorClass =
+  | 'DOMException'
+  | 'TypeError'
+  | 'DecodeFailure'
+  | 'InternalError'
+  | 'UnhandledException';
+
+/**
+ * @name ErrorDetails
+ * @description Typed error response for additional info on type of error encountered during fetch call or parsing network call response
+ */
+export type ErrorDetails = {
+  class: ErrorClass | string;
+  name: string;
+  message: string | null;
+  cause: unknown;
+  stack: string | null;
 };
