@@ -1,4 +1,4 @@
-import { generateRawResponse } from './utils';
+import { generateRawResponse, getErrorDetails } from './utils';
 import type {
   APICallStartHook,
   APICallEndHook,
@@ -23,7 +23,7 @@ export class APICaller {
    * @returns An resolved Promise with Two Instances - APISuccess or APIFailure
    */
 
-  static async call<SuccessResponse, ErrorResponse>(
+  static async call<SuccessResponse, ErrorResponse = unknown>(
     apiRequest: APIRequest,
     responseDecoder: ResponseDecoder<SuccessResponse>,
     errorResponseDecoder: ResponseDecoder<ErrorResponse | unknown> = (e) => e,
@@ -53,12 +53,14 @@ export class APICaller {
           'Failed to decode API result to success response',
           apiResponse.status,
           decodedErrorResponse,
-          timeConsumed
+          timeConsumed,
+          decodedErrorResponse === null ? { rawResponse: rawResponse + '' } : null
         );
         result = apiFailureResponse;
       }
     } catch (e: unknown) {
-      const callerError = new APIFailure('Exception in call API: ' + String(e), -1, null, 0);
+      const errorDetails = getErrorDetails(e);
+      const callerError = new APIFailure('Exception in Call API', -1, null, 0, errorDetails);
       result = callerError;
     }
     this.endHooks.forEach((hook) => {

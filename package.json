@@ -28,6 +28,9 @@
     "url": "https://github.com/sinha-sahil/typesafe-api-call/issues"
   },
   "homepage": "https://github.com/sinha-sahil/typesafe-api-call#readme",
+  "dependencies": {
+    "type-decoder": "^1.1.0"
+  },
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
