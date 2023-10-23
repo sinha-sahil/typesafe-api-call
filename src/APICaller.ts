@@ -1,11 +1,12 @@
-import { generateRawResponse } from './utils';
+import { generateRawResponse, getErrorDetails } from './utils';
 import type {
   APICallStartHook,
   APICallEndHook,
   APIRequest,
   APIResponse,
   FetchType,
-  ResponseDecoder
+  ResponseDecoder,
+  ErrorDetails
 } from './types';
 import { APISuccess, APIFailure } from './types';
 
@@ -18,15 +19,15 @@ export class APICaller {
    * @description A global function for making API Calls, Uses fetch and constructs request from apiRequest param passed
    * @param apiRequest An instance/object which implements APIRequest interface used to call API
    * @param responseDecoder An function which helps decoding successful raw response to expected success type
-   * @param errorResponseDecoder An function which helps decoding failure raw response to expected failure type
+   * @param errorResponseDecoder A function which helps decoding failure raw response to expected failure type
    * @param apiCaller function to override the native fetch method
    * @returns An resolved Promise with Two Instances - APISuccess or APIFailure
    */
 
-  static async call<SuccessResponse, ErrorResponse>(
+  static async call<SuccessResponse, ErrorResponse = null>(
     apiRequest: APIRequest,
     responseDecoder: ResponseDecoder<SuccessResponse>,
-    errorResponseDecoder: ResponseDecoder<ErrorResponse | unknown> = (e) => e,
+    errorResponseDecoder: ResponseDecoder<ErrorResponse> | null = null,
     apiCaller: FetchType = fetch
   ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
     let result: APIResponse<SuccessResponse, ErrorResponse>;
@@ -48,18 +49,37 @@ export class APICaller {
         );
         result = apiSuccessResponse;
       } else {
-        const decodedErrorResponse = await errorResponseDecoder(rawResponse);
-        const apiFailureResponse = new APIFailure(
+        const decodedErrorResponse =
+          errorResponseDecoder !== null ? errorResponseDecoder(rawResponse) : null;
+        const errorDetails: ErrorDetails | null =
+          decodedErrorResponse !== null
+            ? null
+            : {
+                class: 'DecodeFailure',
+                name: 'DecodeFailure',
+                cause: null,
+                message: '',
+                stack: null
+              };
+        const apiFailureResponse = new APIFailure<ErrorResponse>(
           'Failed to decode API result to success response',
           apiResponse.status,
           decodedErrorResponse,
-          timeConsumed
+          rawResponse,
+          timeConsumed,
+          errorDetails
         );
         result = apiFailureResponse;
       }
-    } catch (e: unknown) {
-      const callerError = new APIFailure('Exception in call API: ' + String(e), -1, null, 0);
-      result = callerError;
+    } catch (error: unknown) {
+      result = new APIFailure<ErrorResponse>(
+        'Exception in APICaller.call',
+        -1,
+        null,
+        error,
+        0,
+        getErrorDetails(error)
+      );
     }
     this.endHooks.forEach((hook) => {
       hook.func(apiRequest, result);
