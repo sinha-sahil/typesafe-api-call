@@ -63,24 +63,13 @@ await _exec(`
   git add package.json &&
   git commit --amend --no-edit --no-verify &&
   git tag v${newVersion} &&
-  rm -rf package &&
-  npm run build &&
-  cp ./README.md ./package/README.md
+  npm run build
 `);
-
-delete packageJson.scripts;
-delete packageJson.devDependencies;
-await _fs.writeFile(
-  './package/package.json',
-  Buffer.from(JSON.stringify(packageJson, null, 2) + '\n', 'utf-8'),
-  (err) => logError(err)
-);
 
 stdIO.question('\n\nPublish? (y/n) ', async (answer) => {
   if (answer === 'y') {
     stdIO.question('Enter OTP to publish: ', async (otp) => {
       await _exec(`
-      cd package &&
       npm publish --otp ${otp} &&
       git push -f &&
       git push --tags`);
