@@ -1,0 +1,28 @@
+info:
+  version: 0.0.0
+  title: Example Types
+types:
+  Post:
+    type: object
+    required:
+      - userId
+      - id
+      - title
+      - body
+    properties:
+      userId:
+        type: number
+      id:
+        type: number
+      title:
+        type: string
+      body:
+        type: string
+
+  CreatePostResponse:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: number
