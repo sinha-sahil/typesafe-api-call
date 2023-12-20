@@ -61,7 +61,6 @@ await _fs.writeFile(
 
 await _exec(`
   git add package.json &&
-  git commit --amend --no-edit --no-verify &&
   git tag v${newVersion} &&
   npm run build
 `);
@@ -69,10 +68,7 @@ await _exec(`
 stdIO.question('\n\nPublish? (y/n) ', async (answer) => {
   if (answer === 'y') {
     stdIO.question('Enter OTP to publish: ', async (otp) => {
-      await _exec(`
-      npm publish --otp ${otp} &&
-      git push -f &&
-      git push --tags`);
+      await _exec(`npm publish --otp ${otp}`);
       logSuccess('Published!');
       process.exit(0);
     });
