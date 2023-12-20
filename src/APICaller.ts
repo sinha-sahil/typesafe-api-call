@@ -1,4 +1,4 @@
-import { generateRawResponse, getErrorDetails } from './utils';
+import { generateRawResponse, getErrorDetails, sleep } from './utils';
 import type {
   APICallStartHook,
   APICallEndHook,
@@ -6,13 +6,16 @@ import type {
   APIResponse,
   FetchType,
   ResponseDecoder,
-  ErrorDetails
+  ErrorDetails,
+  RetryConfig,
+  APICallRetryHook
 } from './types';
 import { APISuccess, APIFailure } from './types';
 
 export class APICaller {
   static startHooks: APICallStartHook[] = [];
   static endHooks: Array<APICallEndHook<unknown, unknown>> = [];
+  static retryHooks: Array<APICallRetryHook<unknown, unknown>> = [];
 
   /**
    * @name APICaller.call
@@ -87,15 +90,59 @@ export class APICaller {
     return result;
   }
 
+  /**
+   * @description A global function for making API Calls, Uses fetch and constructs request from apiRequest param passed with support retrying failed calls
+   * @param apiRequest An instance/object which implements APIRequest interface used to call API
+   * @param responseDecoder An function which helps decoding successful raw response to expected success type
+   * @param retryConfig Configuration for retrying failed API calls
+   * @param errorResponseDecoder A function which helps decoding failure raw response to expected failure type
+   * @param apiCaller function to override the native fetch method
+   * @returns An resolved Promise with Two Instances - APISuccess or APIFailure
+   */
+  static async callWithRetries<SuccessResponse, ErrorResponse = null>(
+    apiRequest: APIRequest,
+    responseDecoder: ResponseDecoder<SuccessResponse>,
+    retryConfig: RetryConfig,
+    errorResponseDecoder: ResponseDecoder<ErrorResponse> | null = null,
+    apiCaller: FetchType = fetch
+  ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
+    let response = await this.call(apiRequest, responseDecoder, errorResponseDecoder, apiCaller);
+    // Triggering retries if first call failed
+    if (response instanceof APIFailure) {
+      for (let i = 0; i < retryConfig.maxRetries; i++) {
+        this.retryHooks.forEach((hook) => {
+          hook.func(apiRequest, response, i + 1);
+        });
+        await sleep(retryConfig.retryInterval);
+        response = await this.call(apiRequest, responseDecoder, errorResponseDecoder, apiCaller);
+        // Stopping if response is success or error is not whitelisting in retrying.
+        if (
+          response instanceof APISuccess ||
+          (response.errorDetails !== null &&
+            !retryConfig.retryOn.includes(response.errorDetails.class))
+        ) {
+          break;
+        }
+      }
+    }
+    return response;
+  }
+
   static registerStartHook(hook: APICallStartHook): void {
-    if (typeof this.startHooks.find((presentHook) => presentHook.id === hook.id) !== 'undefined') {
+    if (typeof this.startHooks.find((presentHook) => presentHook.id === hook.id) === 'undefined') {
       this.startHooks.push(hook);
     }
   }
 
   static registerEndHook(hook: APICallEndHook<unknown, unknown>): void {
-    if (typeof this.endHooks.find((presentHook) => presentHook.id === hook.id) !== 'undefined') {
+    if (typeof this.endHooks.find((presentHook) => presentHook.id === hook.id) === 'undefined') {
       this.endHooks.push(hook);
+    }
+  }
+
+  static registerRetryHook(hook: APICallRetryHook<unknown, unknown>): void {
+    if (typeof this.retryHooks.find((presentHook) => presentHook.id === hook.id) === 'undefined') {
+      this.retryHooks.push(hook);
     }
   }
 }

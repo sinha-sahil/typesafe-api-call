@@ -50,7 +50,6 @@ export type FetchType = (input: RequestInfo, init?: RequestInit | undefined) => 
  */
 export type APICallStartHook = { id: string; func: (apiRequest: APIRequest) => void };
 
-
 /**
  * @name APICallEndHook
  */
@@ -59,6 +58,27 @@ export type APICallEndHook<SuccessResponseType, FailureResponseType> = {
   func: (
     apiRequest: APIRequest,
     apiResponse: APIResponse<SuccessResponseType, FailureResponseType>
+  ) => void;
+};
+
+/**
+ * @name APICallRetryHook
+ * @description Hook function which will be triggered on retry of failed api calls
+ * @property id: unique id of the hook
+ * @property func: function to be executed on retry of failed api calls
+ * @property retryAttempt: number of times the api call has been retried
+ * @example
+ * {
+ * id: 'sampleRetryId',
+ * func: (apiRequest: APIRequest, response: APIResponse<unknown, unknown>, retryCount) => {}
+ * }
+ */
+export type APICallRetryHook<SuccessResponseType, FailureResponseType> = {
+  id: string;
+  func: (
+    apiRequest: APIRequest,
+    apiResponse: APIResponse<SuccessResponseType, FailureResponseType>,
+    retryAttempt: number
   ) => void;
 };
 
@@ -84,4 +104,23 @@ export type ErrorDetails = {
   message: string | null;
   cause: unknown;
   stack: string | null;
+};
+
+/**
+ * @name RetryConfig
+ * @description Configuration for retrying failed API calls
+ * @property maxRetries: number of times to retry the API call
+ * @property retryInterval: interval between retries in milliseconds
+ * @property retryOn: list of error classes on which to retry the API call
+ * @example
+ * {
+ * maxRetries: 3,
+ * retryInterval: 1000,
+ * retryOn: ['DOMException', 'TypeError', 'DecodeFailure', 'InternalError', 'Error', 'UnhandledException']
+ * }
+ */
+export type RetryConfig = {
+  maxRetries: number;
+  retryInterval: number;
+  retryOn: ErrorClass[];
 };
