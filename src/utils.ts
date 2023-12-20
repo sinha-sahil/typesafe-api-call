@@ -46,3 +46,12 @@ export function getErrorDetails(err: unknown): ErrorDetails {
     };
   }
 }
+
+/**
+ * Sleep for given time
+ * @param time time in milliseconds to slip
+ * @returns A promise which will be resolved after given time
+ */
+export async function sleep(time: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
