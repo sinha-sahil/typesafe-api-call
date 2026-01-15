@@ -51,7 +51,7 @@ APICaller.registerRetryHook({
       apiRequest.url.href,
       response instanceof APISuccess
         ? response.status
-        : response.errorDetails?.class ?? response.errorCode,
+        : (response.errorDetails?.class ?? response.errorCode),
       ' on attempt: ',
       retryCount
     );

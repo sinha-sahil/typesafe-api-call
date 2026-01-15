@@ -9,17 +9,12 @@ export type Post = {
 
 export function decodePost(rawInput: unknown): Post | null {
   if (isJSON(rawInput)) {
-    const userId =  decodeNumber(rawInput.userId);
-    const id =  decodeNumber(rawInput.id);
-    const title =  decodeString(rawInput.title);
-    const body =  decodeString(rawInput.body);
+    const userId = decodeNumber(rawInput.userId);
+    const id = decodeNumber(rawInput.id);
+    const title = decodeString(rawInput.title);
+    const body = decodeString(rawInput.body);
 
-    if (
-      userId === null ||
-      id === null ||
-      title === null ||
-      body === null
-    ) {
+    if (userId === null || id === null || title === null || body === null) {
       return null;
     }
 
@@ -27,7 +22,7 @@ export function decodePost(rawInput: unknown): Post | null {
       userId,
       id,
       title,
-      body,
+      body
     };
   }
   return null;
@@ -39,20 +34,15 @@ export type CreatePostResponse = {
 
 export function decodeCreatePostResponse(rawInput: unknown): CreatePostResponse | null {
   if (isJSON(rawInput)) {
-    const id =  decodeNumber(rawInput.id);
+    const id = decodeNumber(rawInput.id);
 
-    if (
-      id === null
-    ) {
+    if (id === null) {
       return null;
     }
 
     return {
-      id,
+      id
     };
   }
   return null;
 }
-
-
-

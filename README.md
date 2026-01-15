@@ -18,7 +18,6 @@ npm install typesafe-api-caller
 - A simple example of calling a GET API and handling the response.
 
 ```typescript
-
 import { APICaller, APIResponse, type APIRequest, APISuccess } from 'typesafe-api-call';
 
 const serverEndpoint = 'https://jsonplaceholder.typicode.com';
@@ -28,11 +27,15 @@ async function getAllPosts(): Promise<APIResponse<Post[], unknown>> {
     url: new URL(`${serverEndpoint}/posts`),
     method: 'GET'
   };
-  const apiResponse = await APICaller.call(apiRequest, (successResponse: unknown) => {
-    // Handle success response decoding here
-  }, (errorResponse: unknown) => {
-    // Handle error response decoding here in case the response was not successfully decoded into success response
-  });
+  const apiResponse = await APICaller.call(
+    apiRequest,
+    (successResponse: unknown) => {
+      // Handle success response decoding here
+    },
+    (errorResponse: unknown) => {
+      // Handle error response decoding here in case the response was not successfully decoded into success response
+    }
+  );
   return apiResponse;
 }
 

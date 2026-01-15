@@ -1,4 +1,4 @@
-import { ErrorDetails } from ".";
+import { ErrorDetails } from '.';
 
 /**
  * @name APIFailure
@@ -13,7 +13,14 @@ export class APIFailure<FailureResponseType> {
   readonly errorDetails: ErrorDetails | null;
   readonly time: number;
 
-  constructor(errorMessage: string, errorCode: number, response: FailureResponseType | null, errorResponse: unknown, time: number, errorDetails: ErrorDetails | null) {
+  constructor(
+    errorMessage: string,
+    errorCode: number,
+    response: FailureResponseType | null,
+    errorResponse: unknown,
+    time: number,
+    errorDetails: ErrorDetails | null
+  ) {
     this.errorMessage = errorMessage;
     this.errorCode = errorCode;
     this.response = response;
