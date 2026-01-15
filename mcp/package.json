@@ -1,0 +1,29 @@
+{
+  "name": "typesafe-api-call-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for typesafe-api-call library",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "typesafe-api-call-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && npm run bundle-docs && chmod 755 dist/index.js",
+    "bundle-docs": "mkdir -p dist/bundled/examples && cp ../README.md dist/bundled/ && cp ../examples/index.ts dist/bundled/examples/ && cp ../package.json dist/bundled/",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "typesafe-api-call"
+  ],
+  "author": "Sahil Sinha",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.8",
+    "typescript": "^5.9.3"
+  }
+}
