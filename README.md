@@ -124,10 +124,14 @@ Returned when the API call succeeds and response decoding is successful.
 
 ```typescript
 class APISuccess<T> {
-  readonly statusCode: number;  // HTTP status code (e.g., 200)
-  readonly status: string;      // HTTP status text (e.g., "OK")
-  readonly response: T;         // Decoded response body
-  readonly time: number;        // Response time in milliseconds
+  readonly statusCode: number;     // HTTP status code (e.g., 200)
+  readonly status: string;         // HTTP status text (e.g., "OK")
+  readonly response: T;            // Decoded response body
+  readonly time: number;           // Response time in milliseconds
+  readonly headers: Headers;       // Response headers
+  readonly url: string;            // Final URL after redirects
+  readonly redirected: boolean;    // Whether the request was redirected
+  readonly type: Response['type']; // Response type (basic, cors, opaque, ...)
 }
 ```
 
@@ -137,14 +141,20 @@ Returned when the API call fails or response decoding fails.
 
 ```typescript
 class APIFailure<E> {
-  readonly errorMessage: string;       // Error description
-  readonly errorCode: number;          // HTTP status code (-1 for exceptions)
-  readonly response: E | null;         // Decoded error response (if decoder provided)
-  readonly errorResponse: unknown;     // Raw error response
-  readonly errorDetails: ErrorDetails | null;  // Detailed error info
-  readonly time: number;               // Response time in milliseconds
+  readonly errorMessage: string;              // Error description
+  readonly errorCode: number;                 // HTTP status code (-1 for exceptions)
+  readonly response: E | null;                // Decoded error response (if decoder provided)
+  readonly errorResponse: unknown;            // Raw error response
+  readonly errorDetails: ErrorDetails | null; // Detailed error info
+  readonly time: number;                      // Response time in milliseconds
+  readonly headers: Headers | null;           // Response headers, null when no response was received
+  readonly url: string | null;                // Final URL after redirects, null when no response was received
+  readonly redirected: boolean | null;        // Whether the request was redirected, null when no response was received
+  readonly type: Response['type'] | null;     // Response type, null when no response was received
 }
 ```
+
+On both classes, `type` falls back to `'default'` and `redirected` to `false` when the fetch implementation does not provide them (node-fetch v2 has no `type`, and versions before 2.5 have no `redirected`). These are the spec values for an unfiltered, non-redirected response.
 
 ### ErrorDetails
 

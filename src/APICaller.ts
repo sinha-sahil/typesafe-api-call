@@ -44,12 +44,11 @@ export class APICaller {
       const rawResponse: unknown = await generateRawResponse(apiResponse);
       const decodeResponse = responseDecoder(rawResponse);
       if (decodeResponse !== null) {
-        const apiSuccessResponse = new APISuccess(
-          apiResponse.status,
-          apiResponse.statusText,
-          decodeResponse,
-          timeConsumed
-        );
+        const apiSuccessResponse = new APISuccess({
+          response: decodeResponse,
+          time: timeConsumed,
+          fetchResponse: apiResponse
+        });
         result = apiSuccessResponse;
       } else {
         const decodedErrorResponse =
@@ -64,25 +63,27 @@ export class APICaller {
                 message: '',
                 stack: null
               };
-        const apiFailureResponse = new APIFailure<ErrorResponse>(
-          'Failed to decode API result to success response',
-          apiResponse.status,
-          decodedErrorResponse,
-          rawResponse,
-          timeConsumed,
-          errorDetails
-        );
+        const apiFailureResponse = new APIFailure<ErrorResponse>({
+          errorMessage: 'Failed to decode API result to success response',
+          errorCode: apiResponse.status,
+          response: decodedErrorResponse,
+          errorResponse: rawResponse,
+          time: timeConsumed,
+          errorDetails,
+          fetchResponse: apiResponse
+        });
         result = apiFailureResponse;
       }
     } catch (error: unknown) {
-      result = new APIFailure<ErrorResponse>(
-        'Exception in APICaller.call',
-        -1,
-        null,
-        error,
-        0,
-        getErrorDetails(error)
-      );
+      result = new APIFailure<ErrorResponse>({
+        errorMessage: 'Exception in APICaller.call',
+        errorCode: -1,
+        response: null,
+        errorResponse: error,
+        time: 0,
+        errorDetails: getErrorDetails(error),
+        fetchResponse: null
+      });
     }
     this.endHooks.forEach((hook) => {
       hook.func(apiRequest, result);

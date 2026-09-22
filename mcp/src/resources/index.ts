@@ -106,6 +106,10 @@ export class APISuccess<T> {
   readonly status: string;
   readonly response: T;
   readonly time: number;
+  readonly headers: Headers;
+  readonly url: string;
+  readonly redirected: boolean;
+  readonly type: Response['type'];
 }
 
 export class APIFailure<E> {
@@ -115,6 +119,10 @@ export class APIFailure<E> {
   readonly errorResponse: unknown;
   readonly errorDetails: ErrorDetails | null;
   readonly time: number;
+  readonly headers: Headers | null;
+  readonly url: string | null;
+  readonly redirected: boolean | null;
+  readonly type: Response['type'] | null;
 }
 
 export type ErrorDetails = {
