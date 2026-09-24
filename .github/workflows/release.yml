@@ -74,6 +74,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     environment: publish
 
     steps:
@@ -86,8 +87,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '22'
+
+      # OIDC trusted publishing needs npm >= 11.5.1; Node 22 bundles npm 10.
+      - name: Update npm for trusted publishing
+        run: |
+          npm install -g npm@11
+          npm --version
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -134,8 +140,6 @@ jobs:
           echo "Publishing root package to NPM..."
           npm publish
           echo "Root package published successfully!"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit and tag release
         if: steps.version-check.outputs.should_publish == 'true'
@@ -155,6 +159,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     environment: publish
 
     steps:
@@ -167,8 +172,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '22'
+
+      # OIDC trusted publishing needs npm >= 11.5.1; Node 22 bundles npm 10.
+      - name: Update npm for trusted publishing
+        run: |
+          npm install -g npm@11
+          npm --version
 
       - name: Configure Git
         run: |
@@ -215,8 +225,6 @@ jobs:
           echo "Publishing MCP package to NPM..."
           npm publish
           echo "MCP package published successfully!"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit and tag MCP release
         if: steps.version-check.outputs.should_publish == 'true'
