@@ -34,11 +34,11 @@ export class APICaller {
     apiCaller: FetchType = fetch
   ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
     let result: APIResponse<SuccessResponse, ErrorResponse>;
+    this.startHooks.forEach((hook) => {
+      hook.func(apiRequest);
+    });
+    const startTime = Date.now();
     try {
-      this.startHooks.forEach((hook) => {
-        hook.func(apiRequest);
-      });
-      const startTime = Date.now();
       const apiResponse: Response = await apiCaller(apiRequest.url.href, apiRequest);
       const timeConsumed = Date.now() - startTime;
       const rawResponse: unknown = await generateRawResponse(apiResponse);
@@ -60,7 +60,7 @@ export class APICaller {
                 class: 'DecodeFailure',
                 name: 'DecodeFailure',
                 cause: null,
-                message: '',
+                message: `Failed to decode response with status ${apiResponse.status}`,
                 stack: null
               };
         const apiFailureResponse = new APIFailure<ErrorResponse>({
@@ -80,7 +80,7 @@ export class APICaller {
         errorCode: -1,
         response: null,
         errorResponse: error,
-        time: 0,
+        time: Date.now() - startTime,
         errorDetails: getErrorDetails(error),
         fetchResponse: null
       });
@@ -108,23 +108,20 @@ export class APICaller {
     apiCaller: FetchType = fetch
   ): Promise<APIResponse<SuccessResponse, ErrorResponse>> {
     let response = await this.call(apiRequest, responseDecoder, errorResponseDecoder, apiCaller);
-    // Triggering retries if first call failed
-    if (response instanceof APIFailure) {
-      for (let i = 0; i < retryConfig.maxRetries; i++) {
-        this.retryHooks.forEach((hook) => {
-          hook.func(apiRequest, response, i + 1);
-        });
-        await sleep(retryConfig.retryInterval);
-        response = await this.call(apiRequest, responseDecoder, errorResponseDecoder, apiCaller);
-        // Stopping if response is success or error is not whitelisting in retrying.
-        if (
-          response instanceof APISuccess ||
-          (response.errorDetails !== null &&
-            !retryConfig.retryOn.includes(response.errorDetails.class))
-        ) {
-          break;
-        }
+    // Retrying only failures whose error class is whitelisted in retryOn
+    for (let i = 0; i < retryConfig.maxRetries; i++) {
+      if (
+        response instanceof APISuccess ||
+        response.errorDetails === null ||
+        !retryConfig.retryOn.includes(response.errorDetails.class)
+      ) {
+        break;
       }
+      this.retryHooks.forEach((hook) => {
+        hook.func(apiRequest, response, i + 1);
+      });
+      await sleep(retryConfig.retryInterval);
+      response = await this.call(apiRequest, responseDecoder, errorResponseDecoder, apiCaller);
     }
     return response;
   }
